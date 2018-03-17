@@ -6,26 +6,37 @@ Code for Borobot2
 * Capteurs ligne blanche
    * Avant   : A1
    * Arriere : A0
+* Valeurs seuils des capteurs de ligne blanche
+   * arrière sur le blanc,avant sur le noir
+      * A0  < 60
+      * A1 > 800 
+   * arrière sur le noir,avant sur le blanc
+      * A0  > 800
+      * A1< 60
 
-arrière sur le blanc,avant sur le noir
-A0  < 60      A1 > 800 
-arrière sur le noir,avant sur le blanc
-A0  > 800      A1< 60
-valeurs vérifiées
+* Capteurs IR
+  * Avant   : A2
+  * Arriere : A3
+* Valeurs deuils des capteur IR
+  * Obstacle à  4  cm -> Valeur : 600
+  * Obstacle à  40 cm -> Valeur : 60
 
-Capteurs IR : A2 (devant), A3 (arrière) détection à 4 cm 600,
-à 40 cm : 60
-valeurs confirmées
+* Moteur droite
+  * Marche avant   : D11
+  * Marche arrière : D12 
+* Moteur gauche
+  * Marche avant   : D9
+  * Marche arrière : D10 
 
-Moteur droite : D11 (marche avant), D12 (marche arrière)
-Moteur gauche : D9, D10 
+* Leds
+  * Led verte : D8
+  * Led rouge : D7 
 
-Leds : D8 led verte, D7 led rouge
+* Servo
+  * Volets : D4
 
-Servo : D4 (volets)
-
-Boutons : 
-Bouton Jaune : D2
-Bouton Rouge : D3
-Bouton Noir : On/Off non connecter a l’arduino (coupe-circuit)
+* Boutons 
+  * Bouton Jaune : D2
+  * Bouton Rouge : D3
+  * Bouton Noir : On/Off non connecter a l’arduino (coupe-circuit)
 
