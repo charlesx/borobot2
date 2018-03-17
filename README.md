@@ -1,9 +1,12 @@
 # borobot2
 Code for Borobot2
 
-BoRoBot
+# BoRoBot - Pin list
 
-Capteurs ligne blanche : A1 (avant), A0 (arrière)
+* Capteurs ligne blanche
+   * Avant   : A1
+   * Arriere : A0
+
 arrière sur le blanc,avant sur le noir
 A0  < 60      A1 > 800 
 arrière sur le noir,avant sur le blanc
