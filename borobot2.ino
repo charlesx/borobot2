@@ -368,6 +368,7 @@ void detectionDojo() {
 }
 
 void loop() {
+  switch (s_state){
   #ifdef DEBUG
     Serial.println("");
     Serial.print("State:");
@@ -375,7 +376,6 @@ void loop() {
     Serial.print("Next State:");
     Serial.println(s_state_next);
   #endif
-  switch (s_state){
 
     case START:
       #ifdef DEBUG
