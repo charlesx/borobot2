@@ -1,7 +1,7 @@
-// Variable Machine d'etat
 #define DEBUG
 //#define SLOW 
 
+// Variable Machine d'etat
 #define START 1
 #define WAIT 2
 #define FLAPS 3
