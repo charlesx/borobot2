@@ -1,7 +1,8 @@
+// Variable Machine d'etat
 #define DEBUG
+//#define DEBUG_SEUIL
 //#define SLOW 
 
-// Variable Machine d'etat
 #define START 1
 #define WAIT 2
 #define FLAPS 3
@@ -33,8 +34,8 @@ int *cal;
 
 
 // LED
-const int led1Pin = 7; //LED verte
-const int led2Pin = 8; //LED rouge
+const int led1Pin = 7; //LED rouge
+const int led2Pin = 8; //LED verte
 
 
 // Bouton
@@ -53,48 +54,45 @@ const int servoPin=4; // VALEUR A VERIFIER
 
 
 #define VOLETS_LOCKED 45
-#define VOLET_OPENED 0
+#define VOLETS_OPENED 0
 
 
 void setup() {  
   #ifdef DEBUG
     Serial.begin(9600 );
   #endif
-  // On initialise la machine d'etat 
-  s_state=START;
+  #ifdef DEBUG_SEUIL
+    Serial.begin(9600 );
+  #endif
 
   //Inititalise les LED a OFF
-  blinkled();
-  delay(1000);
+  #ifdef DEBUG
+  	Serial.println("SETUP : On eteint les leds");
+  #endif
   digitalWrite(led1Pin, 0);
   digitalWrite(led2Pin, 0);
 
-  // Met la LED de detection rouge a ON
-  digitalWrite(led2Pin, 1);
+  // Met la LED rouge a ON
+  #ifdef DEBUG
+  	Serial.println("SETUP : On allume la led ROUGE");
+  #endif
+  digitalWrite(led1Pin, 1);
 
   // Servo
   // Lien Pin / Servo
   servo.attach(servoPin);
-  // On bloque les volets
   #ifdef DEBUG
   	Serial.println("SETUP : On bloque les volets");
   #endif
   servo.write(VOLETS_LOCKED);
 
-}
-
-
-void blinkled() {
-  digitalWrite(led1Pin, 0);
-  digitalWrite(led2Pin, 0);
-  delay(1000);
-  digitalWrite(led1Pin, 1);
-  digitalWrite(led2Pin, 1);
+  // On initialise la machine d'etat 
+  s_state=START;
 }
 
 void attenteAppuieBouton() {
-
     int buttonStartState=0;
+
     #ifdef DEBUG
       Serial.print("START - initialisation:  ");
       Serial.println(buttonStartState);
@@ -111,15 +109,17 @@ void attenteAppuieBouton() {
 
     if (buttonStartState == 1){
         #ifdef DEBUG
-          Serial.println("START - Le bouton start a ete appuye");
+          Serial.println("START - Le bouton start a ete appuye - La Led verte s'allume - La rouge s'eteint");
         #endif
+  	digitalWrite(led1Pin, 0);
+  	digitalWrite(led2Pin, 1);
         s_state_next=WAIT;
-    }
+    } 
     else {
         #ifdef DEBUG
-          Serial.println("START - Waiting for Start button to be pressed");
+          Serial.println("START - Waiting for Start button to be pressed - Red led is on");
         #endif
-        blinkled();
+  	digitalWrite(led1Pin, 1);
         s_state_next=START;
     }
   
@@ -138,10 +138,10 @@ int * lectureCapteur(){
     #ifdef DEBUG
       //Serial.print("Valeur Capteur Avant");
       //Serial.println("  Valeur Capteur Arriere");
-      Serial.print("       ");
+      /*Serial.print("       ");
       Serial.print(valeursLu[0]);
       Serial.print("       ");
-      Serial.println(valeursLu[1]);
+      Serial.println(valeursLu[1]);*/
     #endif
   
     return valeursLu;
@@ -172,6 +172,11 @@ int detecter() {
     for (int i=0;i<maxarray ;i++) {
       seuil[i]=cal[i];
     }
+    // TODO To adjust contest's day
+    //Seuil avant
+    seuil[0]=110;
+    //Seuil arriere
+    seuil[1]=130;
     /*// Pointeur sur un entier pour acceder au valeur du tableau de valeurs lues
     int *valeurLu;
     valeurLu=lectureCapteur();*/
@@ -190,25 +195,40 @@ int detecter() {
       Serial.print("       ");
       Serial.println(*(valeurMoy+1));
     #endif
-    if ( *(valeurMoy) > *(seuil)) {
+    #ifdef DEBUG_SEUIL
+      Serial.print("valeurMoy: ");
+      Serial.print(*(valeurMoy));
+      Serial.print("       ");
+      Serial.println(*(valeurMoy+1));
+    #endif
+    // si la valeur(moyenne) capteur avant superieure au seuil avant et si la valeur(moyenne) capteur avant est supperieurie a la valeur du capteur arriere
+    if (( *(valeurMoy) > *(seuil)) && (*(valeurMoy) > *(valeurMoy + 1))) {
         detection = 1;
-        //Allume LED verte quand detection sinon allume led rouge
-        digitalWrite(led1Pin, 1);
-        // On etein la LED rouge
-        digitalWrite(led1Pin, 0);
-     }
-     
-     if ( *(valeurMoy + 1) > *(seuil+1)) {
-        detection = 2;
-        //Allume LED verte quand detection sinon allume led rouge
-        digitalWrite(led1Pin, 1);
-        // On etein la LED rouge
-        digitalWrite(led1Pin, 0);
-     }
+    }
+    // si la valeur(moyenne) capteur avant superieure au seuil avant et si la valeur(moyenne) capteur arriere est supperieure a la valeur du capteur avant
+    else if (( *(valeurMoy + 1) > *(seuil+1)) && (*(valeurMoy + 1) > *(valeurMoy))) {
+       detection = 2;
+    }
 
     status_detection=1;
     return detection;
 }
+
+/*
+void Robot50HzInterrupt() {   
+    //int valeurLue=5; //debug
+    
+    if (cpt==5){
+      beDetect = detecter();
+      int cpt=0;
+    }
+    cpt+=1;
+    
+    if(beDetect){
+        digitalWrite(ledPin, HIGH);
+    }
+}
+*/
 
 int * calibrationIR(){
     // Pointeur sur un entier pour acceder au valeur du tableau de valeurs lues
@@ -275,30 +295,37 @@ void wait() {
     #ifdef DEBUG
       Serial.println("WAIT - J'attends... et je calibre mes capteurs");
     #endif
-    delay(3000);
+    int x=0;
+    while (x<=3) {
+      delay(1000);
+      x+=1;
+    } 
     //cal=calibrationIR();
+// INUTILE LES VOLETS SONT DEVANT LES CAPTEURS!!!!!!!
     cal=calibrationMaxIR();
     delay(1000);
 }
 
 int beDetect=0;
 void Robot50HzInterrupt() {
-    #ifdef DEBUG
+/*    #ifdef DEBUG
       Serial.println("Interruptions");
     #endif
     beDetect = detecter();
     if(beDetect){
         digitalWrite(led1Pin, HIGH);
     }
+*/
 
 }
-
 
 void ouvertureVolet() {
     #ifdef DEBUG
       Serial.println("FLAP - Ouverture Volets");
     #endif
-    servo.write(VOLET_OPENED);
+    servo.write(VOLETS_OPENED);
+    delay(100);
+    servo.write(VOLETS_LOCKED);
 }
 
 // Gestion Moteur
@@ -381,6 +408,7 @@ void loop() {
       #ifdef DEBUG
         Serial.println("DEPART");
       #endif
+
       attenteAppuieBouton();
       //s_state_next is set in the function
       break;
@@ -419,6 +447,8 @@ void loop() {
        #ifdef DEBUG
         Serial.println("END - BLINDATTACK");
        #endif
+	// On eteint la LED verte
+      digitalWrite(led1Pin, 0);
       s_state_next=DETECTION;
       break;
 
@@ -429,9 +459,6 @@ void loop() {
       #ifdef DEBUG
         Serial.println("DETECTION");
       #endif
-      // On eteint LED verte et on alume LED rouge
-      digitalWrite(led1Pin, 0);
-      digitalWrite(led1Pin, 1);
         
       int detect;
 
@@ -440,14 +467,23 @@ void loop() {
         Serial.print("DETECTION - Valeur de detect:");
         Serial.println(detect);
       #endif
-      if (detect == 2 ) {
+      if (detect == 1 ) {
+	// On detect devant , on eteint la led rouge on alume la verte
+        digitalWrite(led1Pin, 0);
+        digitalWrite(led2Pin, 1);
         s_state_next=AVANCE;
       }
-      else if (detect == 1) {
+      else if (detect == 2) {
+	// On detect derriere , on eteint la led verte on alume la rouge
+        digitalWrite(led1Pin, 1);
+        digitalWrite(led2Pin, 0);
         s_state_next=RECULE;
         //s_state_next=TOURNE;
       } 
       else {
+	// On detect rien , on eteint toutes les led
+        digitalWrite(led1Pin, 0);
+        digitalWrite(led2Pin, 0);
         s_state_next=TOURNE;
       }
       break;
@@ -456,9 +492,9 @@ void loop() {
       #ifdef SLOW
         delay(attente);
       #endif
-      #ifdef DEBUG
-        Serial.println("AVANCE");
-      #endif
+      //#ifdef DEBUG
+      //  Serial.println("AVANCE");
+      //#endif
       avance(); // lecture capteur + moteur
       s_state_next=DETECTION;     
       break;
@@ -467,9 +503,9 @@ void loop() {
       #ifdef SLOW
         delay(attente);
       #endif
-      #ifdef DEBUG
-        Serial.println("RECULE");
-      #endif
+      //#ifdef DEBUG
+      //  Serial.println("RECULE");
+      //#endif
       recule(); // lecture capteur + moteur
       s_state_next=DETECTION;     
       break;
