@@ -214,22 +214,6 @@ int detecter() {
     return detection;
 }
 
-/*
-void Robot50HzInterrupt() {   
-    //int valeurLue=5; //debug
-    
-    if (cpt==5){
-      beDetect = detecter();
-      int cpt=0;
-    }
-    cpt+=1;
-    
-    if(beDetect){
-        digitalWrite(ledPin, HIGH);
-    }
-}
-*/
-
 int * calibrationIR(){
     // Pointeur sur un entier pour acceder au valeur du tableau de valeurs lues
     int *valeurLu;
@@ -305,6 +289,22 @@ void wait() {
     cal=calibrationMaxIR();
     delay(1000);
 }
+
+/* OLD version
+void Robot50HzInterrupt() {   
+    //int valeurLue=5; //debug
+    
+    if (cpt==5){
+      beDetect = detecter();
+      int cpt=0;
+    }
+    cpt+=1;
+    
+    if(beDetect){
+        digitalWrite(ledPin, HIGH);
+    }
+}
+*/
 
 int beDetect=0;
 void Robot50HzInterrupt() {
